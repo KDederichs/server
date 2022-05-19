@@ -1533,6 +1533,7 @@ class Access extends LDAPUtility {
 			}
 		}
 
+		$originalSearch = $search;
 		$search = $this->prepareSearchTerm($search);
 		if (!is_array($searchAttributes) || count($searchAttributes) === 0) {
 			if ($fallbackAttribute === '') {
@@ -1541,7 +1542,12 @@ class Access extends LDAPUtility {
 			$filter[] = $fallbackAttribute . '=' . $search;
 		} else {
 			foreach ($searchAttributes as $attribute) {
-				$filter[] = $attribute . '=' . $search;
+				// wildcards don't not work with entryUUID
+				if ($attribute === 'entryUUID') {
+					$filter[] = $attribute . '=' . $originalSearch;
+				} else {
+					$filter[] = $attribute . '=' . $search;
+				}
 			}
 		}
 		if (count($filter) === 1) {
